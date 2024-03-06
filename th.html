@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trắc nghiệm</title>
+<style>
+  /* CSS để thiết kế giao diện */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    font-weight: bold;
+  }
+  input[type="text"], input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  .quiz-group {
+    margin-bottom: 30px;
+  }
+  .question {
+    margin-bottom: 10px;
+  }
+  .answers {
+    margin-left: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Thi Trắc Nghiệm</h1>
+  <form id="quizForm">
+    <div class="form-group">
+      <label for="fullName">Họ và tên:</label>
+      <input type="text" id="fullName" required>
+    </div>
+    <div class="form-group">
+      <label for="dob">Ngày tháng năm sinh:</label>
+      <input type="date" id="dob" required>
+    </div>
+    <div class="form-group">
+      <label for="studentID">Mã sinh viên:</label>
+      <input type="text" id="studentID" required>
+    </div>
+    <div class="form-group">
+      <label for="class">Lớp:</label>
+      <input type="text" id="class" required>
+    </div>
+    <button type="button" onclick="startQuiz()">Bắt đầu thi</button>
+  </form>
+
+  <div id="quizQuestions" style="display: none;">
+    <!-- Câu hỏi sẽ được tạo ra tại đây -->
+  </div>
+
+  <button id="submitBtn" style="display: none;" onclick="submitQuiz()">Nộp bài</button>
+
+  <div id="result" style="display: none;">
+    <!-- Kết quả bài làm sẽ được hiển thị ở đây -->
+  </div>
+</div>
+
+<script>
+  // Dữ liệu mẫu cho câu hỏi
+  const questions = [
+    // Nhóm 1: Lựa chọn đúng/sai
+    { type: 'trueFalse', question: 'Việc xây dựng tháp Eiffel được hoàn thành vào ngày 31 tháng 1887 năm XNUMX?', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Tia chớp được nhìn thấy trước khi nó được nghe thấy vì ánh sáng truyền nhanh hơn âm thanh.', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Melbourne là thủ đô của Úc', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Penicillin được phát hiện ở Việt Nam để điều trị bệnh sốt rét', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Núi Phú Sĩ là ngọn núi cao nhất ở Nhật Bản', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Bông cải xanh chứa nhiều vitamin C hơn chanh', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Hộp sọ là xương chắc nhất trong cơ thể con người', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Google ban đầu được gọi là BackRub', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Trầm cảm là nguyên nhân hàng đầu gây ra khuyết tật trên toàn thế giới', answers: ['Đúng', 'Sai'] },
+    { type: 'trueFalse', question: 'Hộp sọ là xương chắc nhất trong cơ thể con người', answers: ['Đúng', 'Sai'] },
+    // Thêm 8 câu hỏi khác vào đây
+
+    // Nhóm 2: Chọn 1 trong 4 đáp án
+    { type: 'multipleChoice', question: 'Các mạng máy tính được thiết kế và cài đặt theo quan điểm:', answers: ['Có cấu trúc đa tầng', 'Nhiều tầng', 'Theo lớp', 'Tập hợp'], correctAnswer: 0 },
+    { type: 'multipleChoice', question: 'Kết quả của 3 + 5 là:', answers: ['8', '7', '9', '5'], correctAnswer: 1 },
+    { type: 'multipleChoice', question: 'Sắp xếp các số: 0, 5, 2, 10 theo thứ tự từ bé đến lớn:', answers: ['10, 5, 2, 0', '2 , 0 , 10 , 5', '0, 5 , 10 , 2', '0 , 2 , 5 , 10'], correctAnswer: 0 },
+    { type: 'multipleChoice', question: 'Số cần điền vào: 7 + 1 > …. + 2 là:', answers: ['7', '5', '10', '0'], correctAnswer: 1 },
+    { type: 'multipleChoice', question: 'Dấu cần điền vào 8 + 2 ….. 9 – 2 là:', answers: ['>', '<', '=', '+'], correctAnswer: 0 },
+    { type: 'multipleChoice', question: 'Số lớn nhất có một chữ số là:', answers: ['5', '10', '1', '9'], correctAnswer: 1 },
+    { type: 'multipleChoice', question: 'Số bé nhất trong các số: 8, 3, 10, 6 là:', answers: ['6', '3', '8', '10'], correctAnswer: 0 },
+    { type: 'multipleChoice', question: 'Kết quả của phép tính: 10 – 8 + 3 là:', answers: ['6', '5', '3', '21'], correctAnswer: 1 },
+    { type: 'multipleChoice', question: 'Phép tính nào sai?', answers: ['7 – 5 = 2', '4 + 4 = 9', '10 – 9 = 1', '0=1'], correctAnswer: 0 },
+    { type: 'multipleChoice', question: 'Số lớn nhất trong các số: 1, 9, 4, 7 là:', answers: ['1', '9', '4', '7'], correctAnswer: 1 },
+    // Thêm 8 câu hỏi khác vào đây
+
+    // Nhóm 3: Chọn nhiều đáp án
+    { type: 'multipleAnswers', question: 'What does the speaker say is available to the listeners?', answers: ['An event calendar', 'A discount on a purchase', 'A subscription to a newsletter', 'Entry in a prize drawing'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'Why does the speaker say, "we ship to customers all over the world"?', answers: ['To reassure the listeners about a service', 'To explain why a storage area is large', 'To emphasize the popularity of some products', 'To make a suggestion for a gift'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'What will the listeners most likely do next?', answers: ['Vote for a board member', 'Share a meal', 'Participate in a workshop', 'Pay membership fees'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'Which lecturer is the speaker excited to hear?', answers: ['Jung-Hoon Kim', 'Mei Na Zhang', 'Maryam Alaoui', 'Isamu Nakamura'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'Who most likely are the listeners?', answers: ['Librarians', 'Engineers', 'Politicians', 'Biologists'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'What is causing a delay?', answers: ['A holiday parade', 'A broken traffic light', 'An icy road', 'A fallen tree'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'What feature of Soft-Palm 51 does the speaker emphasize?', answers: ['It is easy to carry', 'It is less expensive than expected', 'It is energy efficient', 'It is faster than previous models'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'Who is Helen Liu?', answers: ['A company spokesperson', 'A human resources consultant', 'A digital marketing expert', 'A course instructor'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'What is the purpose of the speaker organization?', answers: ['To advise businesses about mergers', 'To arrange travel for executives', ' To share resources with new business owners', 'To recruit volunteers for a research study'], correctAnswers: [0, 1] },
+    { type: 'multipleAnswers', question: 'What does the speaker say about a job candidate?', answers: ['He requires additional training', 'He has good references', 'He speaks several languages', 'He does not live in the area'], correctAnswers: [0, 1] },
+    // Thêm 8 câu hỏi khác vào đây
+
+    // Nhóm 4: Trả lời tự luận
+    { type: 'essay', question: 'Thế nào là corrective maintenance?' },
+    { type: 'essay', question: 'Trình bày thuật toán IDA*' },
+    { type: 'essay', question: 'Thế nào là refactoring' },
+    { type: 'essay', question: 'Trình bày thuật toán DFS' },
+    { type: 'essay', question: 'Trình bày thuật toán BFS' },
+    { type: 'essay', question: 'Trình bày thuật toán quay lui để tìm một chu trình Hamilton của đồ thị' },
+    { type: 'essay', question: 'Trình bày thuật toán Dijkstra tìm đường đi ngắn nhất ' },
+    { type: 'essay', question: 'So sánh giữa smartphone và PC' },
+    { type: 'essay', question: 'Phân biệt kiến trúc máy tính Von Neuman và Harvard' },
+    { type: 'essay', question: 'Viết biểu thức tính lượng tin chứa trong tin x với xác suất p(x)' },
+    // Thêm 8 câu hỏi khác vào đây
+  ];
+
+  // JavaScript để xử lý logic
+  function startQuiz() {
+    document.getElementById("quizQuestions").style.display = "block";
+    document.getElementById("submitBtn").style.display = "block";
+
+    const quizContainer = document.getElementById('quizQuestions');
+    let questionNumber = 1;
+
+    questions.forEach((q, index) => {
+      let questionHtml = `<div class="quiz-group">`;
+      questionHtml += `<div class="question">${questionNumber}. ${q.question}</div>`;
+      questionHtml += `<div class="answers">`;
+
+      if (q.type === 'trueFalse') {
+        questionHtml += `<input type="radio" name="question${index}" value="true"> Đúng<br>`;
+        questionHtml += `<input type="radio" name="question${index}" value="false"> Sai<br>`;
+      } else if (q.type === 'multipleChoice') {
+        q.answers.forEach((answer, ansIndex) => {
+          questionHtml += `<input type="radio" name="question${index}" value="${ansIndex}"> ${answer}<br>`;
+        });
+      } else if (q.type === 'multipleAnswers') {
+        q.answers.forEach((answer, ansIndex) => {
+          questionHtml += `<input type="checkbox" name="question${index}" value="${ansIndex}"> ${answer}<br>`;
+        });
+      } else if (q.type === 'essay') {
+        questionHtml += `<textarea name="question${index}" rows="4" cols="50" placeholder="Trả lời"></textarea>`;
+      }
+
+      questionHtml += `</div></div>`;
+      quizContainer.innerHTML += questionHtml;
+      questionNumber++;
+    });
+  }
+
+  function submitQuiz() {
+  const quizForm = document.getElementById('quizForm');
+  const resultContainer = document.getElementById('result');
+
+  let score = 0;
+  let totalQuestions = 0;
+
+  // Tính điểm và số câu hỏi đúng
+  // ...
+
+  const percentage = (score / totalQuestions) * 100;
+
+  const scoreText = `Điểm của bạn: 90/100`;
+alert(scoreText);
+}
+</script>
+</body>
+</html>
