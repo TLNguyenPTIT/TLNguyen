@@ -51,8 +51,10 @@
 </style>
 </head>
 <body>
+ 
 <div class="container">
   <h1><span style="color: red;"><p>HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG</p></h1>
+    <h2><div><b>Thời gian còn lại <span id="timer">30:00</span></b></div></h2>
   <form id="quizForm">
     <div class="form-group">
       <label for="fullName">Họ và tên:</label>
@@ -77,8 +79,8 @@
     <!-- Câu hỏi sẽ được tạo ra tại đây -->
   </div>
   
-
-  <button id="submitBtn" style="display: none;" onclick="submitQuiz()">Nộp bài</button>
+<form> <button type="submit" id="submitBtn" style="display: none;" formaction="btap.html">Nộp bài</button></form>
+  
 
   <div id="result" style="display: none;">
     <!-- Kết quả bài làm sẽ được hiển thị ở đây -->
@@ -204,7 +206,36 @@ function startQuiz() {
         questionNumber++;
         questionCount++;
     });
+    startTimer();
 }
+
+
+function startTimer() {
+    let duration = 1800; // Đơn vị: giây
+    const timerDisplay = document.getElementById('timer');
+
+    const timerInterval = setInterval(() => {
+        const minutes = Math.floor(duration / 60);
+        let seconds = duration % 60;
+
+        if (seconds < 10) {
+            seconds = `0${seconds}`;
+        }
+
+        timerDisplay.textContent = `${minutes}:${seconds}`;
+
+        if (duration <= 0) {
+            clearInterval(timerInterval);
+            // Xử lý khi hết thời gian ở đây
+            timerDisplay.textContent = 'Hết thời gian!';
+            // Ví dụ: Gửi bài và tính điểm tự động
+            submitQuiz();
+        }
+
+        duration--;
+    }, 1000);
+}
+
 
   function submitQuiz() {
   const quizForm = document.getElementById('quizForm');
